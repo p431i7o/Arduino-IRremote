@@ -14,6 +14,7 @@
  * Also influenced by http://zovirl.com/2008/11/12/building-a-universal-remote-with-an-arduino/
  *
  * JVC and Panasonic protocol added by Kristian Lauszus (Thanks to zenwheel and other people at the original blog post)
+ * LG protocol added by Pablo Ruiz Diaz
  */
 
 #include "IRremote.h"
@@ -84,6 +85,24 @@ void IRsend::sendNEC(unsigned long data, int nbits)
     data <<= 1;
   }
   mark(NEC_BIT_MARK);
+  space(0);
+}
+
+void IRsend::sendLG(unsigned long data,int nbits){
+  enableIROut(38);
+  mark(LG_HDR_MARK);
+  space(LG_HDR_SPACE);
+  for(int i=0; i<nbits;i++){
+    if(data & TOPBIT){
+      mark(LG_BIT_MARK);
+      space(LG_ONE_SPACE);
+    }else{
+      mark(LG_BIT_MARK);
+      space(LG_ZERO_SPACE);
+    }
+    data <<=1;
+  }
+  mark(LG_BIT_MARK);
   space(0);
 }
 
@@ -398,6 +417,12 @@ int IRrecv::decode(decode_results *results) {
     return DECODED;
   }
 #ifdef DEBUG
+  Serial.println("Intentando decodificar LG");
+#endif
+  if(decodeLG(results)){
+    return DECODED;
+  }
+#ifdef DEBUG
   Serial.println("Attempting Sony decode");
 #endif
   if (decodeSony(results)) {
@@ -498,6 +523,55 @@ long IRrecv::decodeNEC(decode_results *results) {
   results->decode_type = NEC;
   return DECODED;
 }
+
+long IRrecv::decodeLG(decode_results *results){
+  long data=0;
+  long offset=1; // revisar saltar primer spacio
+  // Marca inicial
+  if(!MATCH_MARK(results->rawbuf[offset], LG_HDR_MARK)){
+    return ERR;
+  }
+  offset++;
+  if( irparams.rawlen < 2*LG_BITS+4){
+    Serial.println("Error 001");
+    return ERR;
+  }
+  //espacio inicial
+  if(!MATCH_SPACE(results->rawbuf[offset],LG_HDR_SPACE)){
+    Serial.println("Error 002");
+    return ERR;
+  }
+  offset++;
+  for(int i=0;i<LG_BITS; i++){
+    if(!MATCH_MARK(results->rawbuf[offset],LG_BIT_MARK)){
+      Serial.println("Error 003");
+      return ERR;
+    }
+    offset++;
+    if(MATCH_SPACE(results->rawbuf[offset],LG_ONE_SPACE)){
+      data = (data<<1)|1;
+    }else if(MATCH_SPACE(results->rawbuf[offset],LG_ZERO_SPACE)){
+      data <<=1;
+    }else{
+      Serial.println("Error 004");
+      Serial.print("offset: ");
+      Serial.print(offset,DEC);
+      Serial.print("i: ");
+      Serial.print(i,DEC);
+      Serial.println("rawbuf");
+      Serial.println(results->rawbuf[offset]);
+      Serial.println("");
+      return ERR;
+    }
+    offset++;
+  }
+  //Exito!
+  results->bits = LG_BITS;
+  results->value = data;
+  results->decode_type = LG;
+  return DECODED;
+}
+
 
 long IRrecv::decodeSony(decode_results *results) {
   long data = 0;

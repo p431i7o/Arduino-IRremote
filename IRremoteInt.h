@@ -100,6 +100,13 @@
 #define NEC_ZERO_SPACE  560
 #define NEC_RPT_SPACE 2250
 
+#define LG_HDR_MARK 8300
+#define LG_HDR_SPACE 4100
+#define LG_BIT_MARK  600
+#define LG_ONE_SPACE 1600 //1500 no
+#define LG_ZERO_SPACE 600
+
+
 #define SONY_HDR_MARK 2400
 #define SONY_HDR_SPACE  600
 #define SONY_ONE_MARK 1200
@@ -216,6 +223,7 @@ extern volatile irparams_t irparams;
 #define MIN_RC6_SAMPLES 1
 #define PANASONIC_BITS 48
 #define JVC_BITS 16
+#define LG_BITS 28
 
 
 

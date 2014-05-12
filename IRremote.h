@@ -45,6 +45,7 @@ public:
 #define JVC 8
 #define SANYO 9
 #define MITSUBISHI 10
+#define LG 11
 #define UNKNOWN -1
 
 // Decoded value for NEC when a repeat code is received
@@ -63,6 +64,7 @@ private:
   // These are called by decode
   int getRClevel(decode_results *results, int *offset, int *used, int t1);
   long decodeNEC(decode_results *results);
+  long decodeLG(decode_results *results);
   long decodeSony(decode_results *results);
   long decodeSanyo(decode_results *results);
   long decodeMitsubishi(decode_results *results);
@@ -88,6 +90,7 @@ class IRsend
 public:
   IRsend() {}
   void sendNEC(unsigned long data, int nbits);
+  void sendLG(unsigned long data,int nbits);
   void sendSony(unsigned long data, int nbits);
   // Neither Sanyo nor Mitsubishi send is implemented yet
   //  void sendSanyo(unsigned long data, int nbits);
