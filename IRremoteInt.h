@@ -214,6 +214,7 @@ extern volatile irparams_t irparams;
 #define SPACE 1
 
 #define TOPBIT  0x80000000
+//TOPBIT 2 is for 28bit operations
 #define TOPBIT2 0x8000000
 
 #define NEC_BITS 32

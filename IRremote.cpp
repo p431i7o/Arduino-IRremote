@@ -88,9 +88,7 @@ void IRsend::sendNEC(unsigned long data, int nbits)
   space(0);
 }
 
-void IRsend::sendLG(unsigned long data,int nbits){
-  Serial.println("Enviando LG");
-  Serial.println(data);
+void IRsend::sendLG(unsigned long data,int nbits){  
   enableIROut(38);
   mark(LG_HDR_MARK);
   space(LG_HDR_SPACE);
@@ -525,28 +523,25 @@ long IRrecv::decodeNEC(decode_results *results) {
   results->decode_type = NEC;
   return DECODED;
 }
-
+//Based mostly on the method example decodeNEC
 long IRrecv::decodeLG(decode_results *results){
   long data=0;
   long offset=1; // revisar saltar primer spacio
-  // Marca inicial
+  // Initial Mark
   if(!MATCH_MARK(results->rawbuf[offset], LG_HDR_MARK)){
     return ERR;
   }
   offset++;
   if( irparams.rawlen < 2*LG_BITS+4){
-    Serial.println("Error 001");
     return ERR;
   }
-  //espacio inicial
+  //Initial space
   if(!MATCH_SPACE(results->rawbuf[offset],LG_HDR_SPACE)){
-    Serial.println("Error 002");
     return ERR;
   }
   offset++;
   for(int i=0;i<LG_BITS; i++){
     if(!MATCH_MARK(results->rawbuf[offset],LG_BIT_MARK)){
-      Serial.println("Error 003");
       return ERR;
     }
     offset++;
@@ -555,19 +550,11 @@ long IRrecv::decodeLG(decode_results *results){
     }else if(MATCH_SPACE(results->rawbuf[offset],LG_ZERO_SPACE)){
       data <<=1;
     }else{
-      Serial.println("Error 004");
-      Serial.print("offset: ");
-      Serial.print(offset,DEC);
-      Serial.print("i: ");
-      Serial.print(i,DEC);
-      Serial.println("rawbuf");
-      Serial.println(results->rawbuf[offset]);
-      Serial.println("");
       return ERR;
     }
     offset++;
   }
-  //Exito!
+  //Success!
   results->bits = LG_BITS;
   results->value = data;
   results->decode_type = LG;
