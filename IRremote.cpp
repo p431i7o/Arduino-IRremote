@@ -89,11 +89,13 @@ void IRsend::sendNEC(unsigned long data, int nbits)
 }
 
 void IRsend::sendLG(unsigned long data,int nbits){
+  Serial.println("Enviando LG");
+  Serial.println(data);
   enableIROut(38);
   mark(LG_HDR_MARK);
   space(LG_HDR_SPACE);
   for(int i=0; i<nbits;i++){
-    if(data & TOPBIT){
+    if(data & TOPBIT2){
       mark(LG_BIT_MARK);
       space(LG_ONE_SPACE);
     }else{
